@@ -72,5 +72,5 @@ uint16_t MCP3204::readADC(uint8_t channel)
                      buff[2] = DDXXXXXX*/                     
   //printf("Got: %.2x %.2x %.2x\n", buff[0], buff[1], buff[2]);
   
-  return ((buff[0] << 10) | (buff[1] << 4) | (buff[2] >> 6));
+  return ((buff[0] << 10) | (buff[1] << 2) | (buff[2] >> 6));
 }
