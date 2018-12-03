@@ -50,12 +50,12 @@ bool MCP3204::begin(uint8_t spiModule, uint8_t cs)
 
 uint16_t MCP3204::readADC(uint8_t channel)
 {
-  //after sending the 4 channel bits, 14 more clocks are needed to get the data. 18 clocks -> 3 bytes
+  //see page 18 of datasheet: https://www.mouser.com/datasheet/2/268/21298c-68472.pdf
   char buff[3] = {0};
   
-  buff[0] = channel << 4;
-  buff[1] = 0x00;
-  buff[2] = 0x00; //extra zeros will be received after data
+  buff[0] = (0x1 << 2) | channel >> 2;
+  buff[1] = channel << 6;
+  buff[2] = 0x00;
   
   //printf("Sending: %.2x %.2x %.2x\n", buff[0], buff[1], buff[2]);
   
@@ -66,11 +66,12 @@ uint16_t MCP3204::readADC(uint8_t channel)
     bcm2835_spi_chipSelect(this->cs);
     bcm2835_spi_transfern(buff, sizeof(buff));
   }
-    
-  /*output should be buff[0] = XXXXXXDD
-                     buff[1] = DDDDDDDD
-                     buff[2] = DDXXXXXX*/                     
+         
+  /*output should be buff[0] = XXXXXXXX
+                     buff[1] = XXXXDDDD
+                     buff[2] = DDDDDDDD*/
+                                  
   //printf("Got: %.2x %.2x %.2x\n", buff[0], buff[1], buff[2]);
   
-  return ((buff[0] << 10) | (buff[1] << 2) | (buff[2] >> 6));
+  return ((buff[1] << 8) | buff[2]); 
 }
